@@ -25,6 +25,12 @@ const main = async () => {
     txn = await gameContract.mintCharacterNFT(2);
     await txn.wait();
 
+    txn = await gameContract.mintCharacterNFT(1);
+    await txn.wait();
+
+    txn = await gameContract.getAllPlayers();
+    console.log("getAllPlayers",txn);
+
     // Pega o valor da URI da NFT
     let returnedTokenUri = await gameContract.tokenURI(1);
     console.log("Token URI:", returnedTokenUri);
@@ -32,8 +38,6 @@ const main = async () => {
     txn = await gameContract.attackBoss();
     await txn.wait();
     
-    txn = await gameContract.attackBoss();
-    await txn.wait();
 };
 
 const runMain = async () => {

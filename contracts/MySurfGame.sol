@@ -18,6 +18,8 @@ contract MySurfGame is ERC721 {
         uint256 maneuver;
         uint256 tubeRiding;
         uint256 aerial;
+        address owner;
+        uint256 score;
     }
 
     using Counters for Counters.Counter;
@@ -40,13 +42,14 @@ contract MySurfGame is ERC721 {
 
     //address => holder mapping, used to easily access nft holder
     mapping(address => uint256) public nftHolders;
+    mapping(uint256 => address) public players;
 
     event CharacterNFTMinted(
         address sender,
         uint256 tokenId,
         uint256 characterIndex
     );
-    event AttackComplete(uint256 newBossHp, uint256 newPlayerHp);
+    event AttackComplete(uint256 newBossHp, uint256 newPlayerHp, uint256 newScore);
 
     constructor(
         string[] memory characterNames,
@@ -85,7 +88,9 @@ contract MySurfGame is ERC721 {
                     maxHp: characterHp[i],
                     maneuver: characterManeuver[i],
                     tubeRiding: characterTubeRiding[i],
-                    aerial: characterAerial[i]
+                    aerial: characterAerial[i],
+                    owner: address(0),
+                    score: 0
                 })
             );
 
@@ -125,7 +130,9 @@ contract MySurfGame is ERC721 {
             maxHp: defaultCharacters[_characterIndex].maxHp,
             maneuver: defaultCharacters[_characterIndex].maneuver,
             tubeRiding: defaultCharacters[_characterIndex].tubeRiding,
-            aerial: defaultCharacters[_characterIndex].aerial
+            aerial: defaultCharacters[_characterIndex].aerial,
+            owner: msg.sender,
+            score: 0
         });
 
         console.log(
@@ -136,6 +143,7 @@ contract MySurfGame is ERC721 {
 
         // Keep track of the holder
         nftHolders[msg.sender] = newItemId;
+        players[newItemId] = msg.sender;
 
         // Increment for next use
         _tokenIds.increment();
@@ -205,6 +213,18 @@ contract MySurfGame is ERC721 {
             CharacterAttributes memory emptyStruct;
             return emptyStruct;
         }
+    }
+
+    function getAllPlayers()
+        public
+        view
+        returns (CharacterAttributes[] memory)
+    {
+        CharacterAttributes[] memory allPlayers = new CharacterAttributes[](_tokenIds.current() -1);
+        for (uint256 i = 1; i < _tokenIds.current(); i += 1) {
+            allPlayers[i-1] = nftHolderAttributes[i];
+        }
+        return allPlayers;
     }
 
     function getAllDefaultCharacters()
@@ -297,12 +317,14 @@ contract MySurfGame is ERC721 {
             bigBoss.waves = bigBoss.waves - attackDamage;
         }
 
-        // The surfer get tired, deduce HP
+        // The surfer got tired, deduce HP
         if (player.hp < bigBoss.attackDamage) {
             player.hp = 0;
         } else {
             player.hp = player.hp - bigBoss.attackDamage;
         }
+
+        player.score += attackDamage;
 
         console.log(
             "\nO pico ainda tem %s ondas antes de terminar o swell",
@@ -314,6 +336,6 @@ contract MySurfGame is ERC721 {
         );
 
         // Emit wave catched
-        emit AttackComplete(bigBoss.waves, player.hp);
+        emit AttackComplete(bigBoss.waves, player.hp, player.score);
     }
 }
