@@ -168,7 +168,7 @@ contract MySurfGame is ERC721 {
                 charAttributes.name,
                 " -- NFT #: ",
                 Strings.toString(_tokenId),
-                '", "description": "Esta NFT da acesso ao meu jogo NFT!", "image": "',
+                '", "description": "Esta NFT da acesso ao meu jogo NFT!", "image": "ipfs://',
                 charAttributes.imageURI,
                 '", "attributes": [ { "trait_type": "Health Points", "value": ',
                 strHp,

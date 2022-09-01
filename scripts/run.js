@@ -3,9 +3,9 @@ const main = async () => {
     const gameContract = await gameContractFactory.deploy(
         ["Kelly Slater", "Gabriel Medina", "Tatiana Webb"],
         [
-            "https://i.imgur.com/sMjDMLX.png",
-            "https://i.imgur.com/tHmPkfi.png",
-            "https://i.imgur.com/I4gpXTD.png",
+            "QmVU8NoVdzkQaBMaxWzujpEDfehz2wpD2ZPxWvyQupcpEd",
+            "QmSwf2uHVoh4enqNji3huhqj767xtThgQP4ivy6mbSYRc4",
+            "Qma69BCxWcd5ZJDALXLRBESk4jhXoUMsHuXsmp6gE7GFaM",
         ],
         [200, 150, 100], // HP values
         [100, 80, 50], // maneuver
@@ -13,8 +13,8 @@ const main = async () => {
         [80, 100, 40], //aerials
         "Pipeline - Hawaii",
         "https://i.imgur.com/GtFuybO.jpg",
-        1000, //boss waves
-        300 //boss Atack
+        5000, //boss waves
+        20 //boss Atack
     );
     await gameContract.deployed();
     console.log("Contrato implantado no endereço:", gameContract.address);
