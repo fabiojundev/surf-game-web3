@@ -41,6 +41,13 @@ contract MySurfGame is ERC721 {
     //address => holder mapping, used to easily access nft holder
     mapping(address => uint256) public nftHolders;
 
+    event CharacterNFTMinted(
+        address sender,
+        uint256 tokenId,
+        uint256 characterIndex
+    );
+    event AttackComplete(uint256 newBossHp, uint256 newPlayerHp);
+
     constructor(
         string[] memory characterNames,
         string[] memory characterImageURIs,
@@ -132,6 +139,9 @@ contract MySurfGame is ERC721 {
 
         // Increment for next use
         _tokenIds.increment();
+
+        // Emit NFT Minted
+        emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
     }
 
     function tokenURI(uint256 _tokenId)
@@ -181,6 +191,34 @@ contract MySurfGame is ERC721 {
         return output;
     }
 
+    function checkIfUserHasNFT()
+        public
+        view
+        returns (CharacterAttributes memory)
+    {
+        // Get tokenId of the surfer NFT from user wallet
+        uint256 userNftTokenId = nftHolders[msg.sender];
+        // If user has tokenId in our map, return surfer.
+        if (userNftTokenId > 0) {
+            return nftHolderAttributes[userNftTokenId];
+        } else {
+            CharacterAttributes memory emptyStruct;
+            return emptyStruct;
+        }
+    }
+
+    function getAllDefaultCharacters()
+        public
+        view
+        returns (CharacterAttributes[] memory)
+    {
+        return defaultCharacters;
+    }
+
+    function getBigBoss() public view returns (BigBoss memory) {
+        return bigBoss;
+    }
+
     function random(uint256 number) public view returns (uint256) {
         return
             uint256(
@@ -204,12 +242,10 @@ contract MySurfGame is ERC721 {
         if (0 == attackType) {
             damage = _player.tubeRiding;
             console.log("Surfista realizou Manobra com nota %s", damage);
-        }
-        else if (1 == attackType) {
+        } else if (1 == attackType) {
             damage = _player.tubeRiding;
             console.log("Surfista pegou um Tubo com nota %s", damage);
-        }
-        else if (2 == attackType) {
+        } else if (2 == attackType) {
             damage = _player.aerial;
             console.log("Surfista fez um Aereo com nota %s", damage);
         }
@@ -268,7 +304,16 @@ contract MySurfGame is ERC721 {
             player.hp = player.hp - bigBoss.attackDamage;
         }
 
-        console.log("\nO pico ainda tem %s ondas antes de terminar o swell", bigBoss.waves);
-        console.log("O surfista gastou energia e ficou com HP: %s\n", player.hp);
+        console.log(
+            "\nO pico ainda tem %s ondas antes de terminar o swell",
+            bigBoss.waves
+        );
+        console.log(
+            "O surfista gastou energia e ficou com HP: %s\n",
+            player.hp
+        );
+
+        // Emit wave catched
+        emit AttackComplete(bigBoss.waves, player.hp);
     }
 }
