@@ -28,6 +28,16 @@ contract MySurfGame is ERC721 {
     //tokenId => NFT attributes mapping
     mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
 
+    struct BigBoss {
+        string name;
+        string imageURI;
+        uint256 waves;
+        uint256 maxWaves;
+        uint256 attackDamage;
+    }
+
+    BigBoss public bigBoss;
+
     //address => holder mapping, used to easily access nft holder
     mapping(address => uint256) public nftHolders;
 
@@ -37,8 +47,27 @@ contract MySurfGame is ERC721 {
         uint256[] memory characterHp,
         uint256[] memory characterManeuver,
         uint256[] memory characterTubeRiding,
-        uint256[] memory characterAerial
+        uint256[] memory characterAerial,
+        string memory bossName,
+        string memory bossImageURI,
+        uint256 bossWaves,
+        uint256 bossAttackDamage
     ) ERC721("Surfers", "SURFER") {
+        bigBoss = BigBoss({
+            name: bossName,
+            imageURI: bossImageURI,
+            waves: bossWaves,
+            maxWaves: bossWaves,
+            attackDamage: bossAttackDamage
+        });
+
+        console.log(
+            "Pico de Surfe inicializado com sucesso %s com %s de ondas, img %s",
+            bigBoss.name,
+            bigBoss.waves,
+            bigBoss.imageURI
+        );
+
         for (uint256 i = 0; i < characterNames.length; i += 1) {
             defaultCharacters.push(
                 CharacterAttributes({
@@ -150,5 +179,96 @@ contract MySurfGame is ERC721 {
         );
 
         return output;
+    }
+
+    function random(uint256 number) public view returns (uint256) {
+        return
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        block.timestamp,
+                        block.difficulty,
+                        msg.sender
+                    )
+                )
+            ) % number;
+    }
+
+    function getAttackDamage(CharacterAttributes storage _player)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 attackType = random(3);
+        uint256 damage = _player.maneuver;
+        if (0 == attackType) {
+            damage = _player.tubeRiding;
+            console.log("Surfista realizou Manobra com nota %s", damage);
+        }
+        else if (1 == attackType) {
+            damage = _player.tubeRiding;
+            console.log("Surfista pegou um Tubo com nota %s", damage);
+        }
+        else if (2 == attackType) {
+            damage = _player.aerial;
+            console.log("Surfista fez um Aereo com nota %s", damage);
+        }
+        return damage;
+    }
+
+    function attackBoss() public {
+        console.log("========== Pegou a onda =========");
+        // Get player's NFT
+        uint256 nftTokenIdOfPlayer = nftHolders[msg.sender];
+        CharacterAttributes storage player = nftHolderAttributes[
+            nftTokenIdOfPlayer
+        ];
+        console.log(
+            "\nAtleta %s fez o drop com %s de HP.",
+            player.name,
+            player.hp
+        );
+        console.log(
+            "Habilidades - manobras: %s, tubos: %s, aereo: %s",
+            player.maneuver,
+            player.tubeRiding,
+            player.aerial
+        );
+        console.log(
+            "\nPico %s tem %s de Ondas e %s de canseira por onda",
+            bigBoss.name,
+            bigBoss.waves,
+            bigBoss.attackDamage
+        );
+
+        // Assure surfer has HP to paddle out.
+        require(
+            player.hp > 0,
+            "Error: personagem precisa ter HP para atacar o boss."
+        );
+
+        // Assure boss has waves
+        require(
+            bigBoss.waves > 0,
+            "Error: Pico precisa ter Ondas para permitir surfe."
+        );
+
+        uint256 attackDamage = getAttackDamage(player);
+        // Allow the player to surf waves
+        if (bigBoss.waves < attackDamage) {
+            bigBoss.waves = 0;
+        } else {
+            bigBoss.waves = bigBoss.waves - attackDamage;
+        }
+
+        // The surfer get tired, deduce HP
+        if (player.hp < bigBoss.attackDamage) {
+            player.hp = 0;
+        } else {
+            player.hp = player.hp - bigBoss.attackDamage;
+        }
+
+        console.log("\nO pico ainda tem %s ondas antes de terminar o swell", bigBoss.waves);
+        console.log("O surfista gastou energia e ficou com HP: %s\n", player.hp);
     }
 }

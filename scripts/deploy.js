@@ -10,7 +10,11 @@ const main = async () => {
         [200, 150, 100], // HP values
         [100, 80, 50], // maneuver
         [100, 100, 80], //tubes
-        [80, 100, 40] //aerials
+        [80, 100, 40], //aerials
+        "Pipeline - Hawaii",
+        "https://i.imgur.com/GtFuybO.jpg",
+        1000, //boss HP
+        10 //boss Atack
     );
 
     await gameContract.deployed();

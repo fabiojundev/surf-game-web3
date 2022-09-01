@@ -10,7 +10,11 @@ const main = async () => {
         [200, 150, 100], // HP values
         [100, 80, 50], // maneuver
         [100, 100, 80], //tubes
-        [80, 100, 40] //aerials
+        [80, 100, 40], //aerials
+        "Pipeline - Hawaii",
+        "https://i.imgur.com/GtFuybO.jpg",
+        1000, //boss waves
+        300 //boss Atack
     );
     await gameContract.deployed();
     console.log("Contrato implantado no endereço:", gameContract.address);
@@ -24,6 +28,12 @@ const main = async () => {
     // Pega o valor da URI da NFT
     let returnedTokenUri = await gameContract.tokenURI(1);
     console.log("Token URI:", returnedTokenUri);
+
+    txn = await gameContract.attackBoss();
+    await txn.wait();
+    
+    txn = await gameContract.attackBoss();
+    await txn.wait();
 };
 
 const runMain = async () => {
