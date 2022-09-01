@@ -12,18 +12,28 @@ const main = async () => {
         [100, 100, 80], //tubes
         [80, 100, 40] //aerials
     );
+
     await gameContract.deployed();
-    console.log("Contrato implantado no endereço:", gameContract.address);
+    console.log("Contrato implantado no endereço:", gameContract.address)
 
     let txn;
-    // Só temos três personagens.
-    // Uma NFT com personagem no index 2 da nossa array.
+    txn = await gameContract.mintCharacterNFT(0);
+    await txn.wait();
+    console.log("Mintou NFT #1");
+
+    txn = await gameContract.mintCharacterNFT(1);
+    await txn.wait();
+    console.log("Mintou NFT #2");
+
     txn = await gameContract.mintCharacterNFT(2);
     await txn.wait();
+    console.log("Mintou NFT #3");
 
-    // Pega o valor da URI da NFT
-    let returnedTokenUri = await gameContract.tokenURI(1);
-    console.log("Token URI:", returnedTokenUri);
+    txn = await gameContract.mintCharacterNFT(1);
+    await txn.wait();
+    console.log("Minted NFT #4");
+
+    console.log("Fim do deploy e mint!");
 };
 
 const runMain = async () => {
